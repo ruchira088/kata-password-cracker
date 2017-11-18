@@ -2,9 +2,9 @@ package utils
 
 object StringUtils
 {
-  def removePrefix(string: String, prefix: String): String =
+  def removePrefix(string: String, prefix: String): Option[String] =
     if (string.startsWith(prefix))
-      string.substring(prefix.length)
+      Some(string.substring(prefix.length))
     else
-      string
+      None
 }

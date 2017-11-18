@@ -26,7 +26,7 @@ object FileUtils
         }
 
         override def completed(integer: Integer, unit: Unit) = {
-          promise.success(new String(byteBuffer.array()).trim.split("\n").toList)
+          promise.success(new String(byteBuffer.array).trim.split("\n").toList)
         }
       })
     } catch {
