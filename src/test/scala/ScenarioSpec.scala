@@ -1,21 +1,37 @@
 import models.Scenario
-import org.scalatest.FlatSpec
+import org.scalatest.{Assertion, FlatSpec, Matchers}
 
-class ScenarioSpec extends FlatSpec
+class ScenarioSpec extends FlatSpec with Matchers
 {
-  case class PasswordList(passwords: List[String]) {
-    def | (password: String) = PasswordList(passwords :+ password)
+  case class StringList(strings: List[String]) {
+    def | (string: String) = StringList(strings :+ string)
   }
 
-  implicit class PasswordPair(password: String) {
-    def | (anotherPassword: String): PasswordList = PasswordList(List(password, anotherPassword))
+  object StringList {
+    implicit def toOptionStringList(stringList: StringList): Option[List[String]] = Some(stringList.strings)
+  }
+
+  implicit class StringPair(string: String) {
+    def | (anotherString: String): StringList = StringList(List(string, anotherString))
+  }
+
+  implicit class ScenarioBuilder(stringList: StringList) {
+    def tryingWith(loginAttempt: String) = Scenario(stringList.strings, loginAttempt)
+  }
+
+  implicit class ScenarioTestCase(scenario: Scenario) {
+    def shouldResult(result: Option[List[String]]): Assertion =
+      Scenario.accept(scenario.passwords, scenario.loginAttempt) shouldEqual result
   }
 
   "Scenario" should "accept login attempt" in {
 
-    val passwords = "because" | "can" | "do" | "must" | "we" | "what"
-    val loginAttempt = "wedowhatwemustbecausewecan"
+    "because" | "can" | "do" | "must" | "we" | "what" tryingWith "wedowhatwemustbecausewecan" shouldResult
+      "we" | "do" | "what" | "we" | "must" | "because" | "we" | "can"
+  }
 
-    println(Scenario.accept(passwords.passwords, loginAttempt))
+  it should "REJECT login attempt" in {
+
+    "hello" | "world" tryingWith "helloplanet" shouldResult None
   }
 }
