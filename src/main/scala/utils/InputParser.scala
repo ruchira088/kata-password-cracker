@@ -1,6 +1,6 @@
 package utils
 
-import exceptions.{InputScenarioCountMismatchException, InvalidStringListLengthException, PasswordCountMismatchException}
+import exceptions.{EmptyInputStringsException, InputScenarioCountMismatchException, InvalidStringListLengthException, PasswordCountMismatchException}
 import models.Scenario
 
 import scala.util.control.NonFatal
@@ -42,6 +42,8 @@ object InputParser
 
       case passwordCount :: passwordsString :: loginAttempt :: rest =>
         parseScenario(List(passwordCount, passwordsString, loginAttempt)) :: parseData(rest)
+
+      case List(_) | List(_, _) => List(parseScenario(input))
     }
 
   def parse(input: List[String]): Try[List[Try[Scenario]]] = input match
@@ -56,5 +58,7 @@ object InputParser
                 else Failure(InputScenarioCountMismatchException(count, data.length))
         }
         yield data
+
+      case Nil => Failure(EmptyInputStringsException)
     }
 }

@@ -5,7 +5,7 @@ import java.nio.file.{Path, Paths}
 import models.Scenario
 import utils.{FileUtils, InputParser}
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.fromTry
@@ -17,8 +17,14 @@ object PasswordCrackerApp
 
   def main(args: Array[String]): Unit =
   {
-    val outcomes = for {
-      inputData <- FileUtils.readFile(INPUT_FILE)
+    val outputResult = Await.result(output(INPUT_FILE), 30 seconds)
+
+    outputResult.foreach(println)
+  }
+
+  def output(inputFile: Path): Future[List[String]] = for
+    {
+      inputData <- FileUtils.readFile(inputFile)
 
       scenarios <- fromTry(InputParser.parse(inputData))
 
@@ -26,11 +32,5 @@ object PasswordCrackerApp
         case Success(scenario) => Scenario.login(scenario)
         case Failure(throwable) => throwable.getMessage
       }
-
     } yield results
-
-    val outputResult = Await.result(outcomes, 30 seconds)
-
-    outputResult.foreach(println)
-  }
 }

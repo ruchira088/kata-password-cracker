@@ -1,29 +1,8 @@
-import models.Scenario
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.FlatSpec
+import helpers.DslBuilder._
 
-class ScenarioSpec extends FlatSpec with Matchers
+class ScenarioSpec extends FlatSpec
 {
-  case class StringList(strings: List[String]) {
-    def | (string: String) = StringList(strings :+ string)
-  }
-
-  object StringList {
-    implicit def toOptionStringList(stringList: StringList): Option[List[String]] = Some(stringList.strings)
-  }
-
-  implicit class StringPair(string: String) {
-    def | (anotherString: String): StringList = StringList(List(string, anotherString))
-  }
-
-  implicit class ScenarioBuilder(stringList: StringList) {
-    def tryingWith(loginAttempt: String) = Scenario(stringList.strings, loginAttempt)
-  }
-
-  implicit class ScenarioTestCase(scenario: Scenario) {
-    def shouldResult(result: Option[List[String]]): Assertion =
-      Scenario.accept(scenario.passwords, scenario.loginAttempt) shouldEqual result
-  }
-
   "Scenario" should "accept login attempt" in {
 
     "because" | "can" | "do" | "must" | "we" | "what" tryingWith "wedowhatwemustbecausewecan" shouldResult
